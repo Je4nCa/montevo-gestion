@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, Download, FileSignature, Pencil, Trash2 } from 'lucide-react';
 import { useCliente } from '@/modules/clientes/hooks/useCliente';
 import { useClientes } from '@/modules/clientes/hooks/useClientes';
 import { ClienteForm } from '@/modules/clientes/components/ClienteForm';
 import { PublicacionesLog } from '@/modules/clientes/components/PublicacionesLog';
+import { useAcuerdos } from '@/modules/clientes/acuerdos/hooks/useAcuerdos';
+import { descargarPdf, base64ToBlob } from '@/modules/clientes/acuerdos/lib/generarPdf';
 import { getPaquete } from '@/shared/constants/paquetes';
 import { getAddOn } from '@/shared/constants/addOns';
 import { Button } from '@/components/ui/button';
@@ -47,6 +49,7 @@ export function ClienteDetailPage() {
   const navigate = useNavigate();
   const { data: cliente, loading } = useCliente(id);
   const { actualizar, desactivar } = useClientes();
+  const { data: acuerdos } = useAcuerdos(id ?? '');
   const [editando, setEditando] = useState(false);
 
   if (loading) {
@@ -95,7 +98,13 @@ export function ClienteDetailPage() {
             </Badge>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button asChild>
+            <Link to={`/clientes/${cliente.id}/acuerdo/nuevo`}>
+              <FileSignature className="h-4 w-4" />
+              Generar acuerdo
+            </Link>
+          </Button>
           <Button variant="outline" onClick={() => setEditando(true)}>
             <Pencil className="h-4 w-4" />
             Editar
@@ -130,10 +139,12 @@ export function ClienteDetailPage() {
             <CardTitle>Contacto y representante</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2 text-base">
+            <p><span className="text-muted-foreground">Ubicación:</span> {cliente.ubicacion}</p>
             <p><span className="text-muted-foreground">Teléfono:</span> {cliente.telefono || '—'}</p>
             <p><span className="text-muted-foreground">Email:</span> {cliente.email || '—'}</p>
             <div className="mt-2 border-t border-montevo-rosa/50 pt-2">
               <p className="font-medium text-montevo-negro">{cliente.representante.nombre}</p>
+              <p className="text-muted-foreground">Cédula: {cliente.representante.cedula}</p>
               {cliente.representante.cargo && (
                 <p className="text-muted-foreground">{cliente.representante.cargo}</p>
               )}
@@ -205,6 +216,43 @@ export function ClienteDetailPage() {
         </CardHeader>
         <CardContent>
           <PublicacionesLog clienteId={cliente.id} paqueteId={cliente.paqueteId} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Acuerdos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!acuerdos || acuerdos.length === 0 ? (
+            <p className="text-muted-foreground">Aún no se ha generado ningún acuerdo.</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-montevo-rosa/40 rounded-lg border border-montevo-rosa/60">
+              {acuerdos.map((acuerdo) => (
+                <li key={acuerdo.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div>
+                    <p className="font-medium text-montevo-negro">{acuerdo.numero}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatFecha(acuerdo.fecha)} · {getPaquete(acuerdo.paqueteId).nombre}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      descargarPdf(
+                        base64ToBlob(acuerdo.pdfBase64),
+                        `Acuerdo_${cliente.nombreCliente.replace(/\s+/g, '_')}_${acuerdo.numero}.pdf`,
+                      )
+                    }
+                  >
+                    <Download className="h-4 w-4" />
+                    Descargar
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
 

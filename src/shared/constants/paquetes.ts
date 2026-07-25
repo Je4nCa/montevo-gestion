@@ -4,6 +4,7 @@ export interface Paquete {
   id: PaqueteId;
   nombre: string;
   precioMensual: number;
+  precioEnPalabras: string;
   publicacionesIncluidas: number;
   reelsIncluidos: number;
   descripcionCorta: string;
@@ -15,6 +16,7 @@ export const PAQUETES: Paquete[] = [
     id: 'esencial',
     nombre: 'Esencial',
     precioMensual: 25000,
+    precioEnPalabras: 'veinticinco mil colones',
     publicacionesIncluidas: 4,
     reelsIncluidos: 2,
     descripcionCorta: 'Presencia mínima y constante en redes sociales.',
@@ -24,6 +26,7 @@ export const PAQUETES: Paquete[] = [
     id: 'emprendedor',
     nombre: 'Emprendedor',
     precioMensual: 50000,
+    precioEnPalabras: 'cincuenta mil colones',
     publicacionesIncluidas: 8,
     reelsIncluidos: 4,
     descripcionCorta: 'Gestión de redes, estrategia mensual y asesoría personalizada.',
@@ -33,6 +36,7 @@ export const PAQUETES: Paquete[] = [
     id: 'profesional',
     nombre: 'Profesional',
     precioMensual: 85000,
+    precioEnPalabras: 'ochenta y cinco mil colones',
     publicacionesIncluidas: 12,
     reelsIncluidos: 6,
     descripcionCorta: 'Landing page, campaña de ads gestionada y branding básico.',
@@ -42,6 +46,7 @@ export const PAQUETES: Paquete[] = [
     id: 'negocio',
     nombre: 'Negocio',
     precioMensual: 140000,
+    precioEnPalabras: 'ciento cuarenta mil colones',
     publicacionesIncluidas: 16,
     reelsIncluidos: 8,
     descripcionCorta: 'Web multipágina, POS/ventas e inventario básico incluidos.',
@@ -51,6 +56,7 @@ export const PAQUETES: Paquete[] = [
     id: 'corporativo',
     nombre: 'Corporativo',
     precioMensual: 230000,
+    precioEnPalabras: 'doscientos treinta mil colones',
     publicacionesIncluidas: 999,
     reelsIncluidos: 999,
     descripcionCorta: 'Inventario multiplataforma, POS multisucursal y soporte prioritario.',

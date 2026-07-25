@@ -14,5 +14,7 @@ export function formatColones(monto: number): string {
 }
 
 export function formatFecha(iso: string): string {
-  return new Intl.DateTimeFormat('es-CR', { dateStyle: 'medium' }).format(new Date(iso));
+  return new Intl.DateTimeFormat('es-CR', { dateStyle: 'medium', timeZone: 'UTC' }).format(
+    new Date(iso),
+  );
 }

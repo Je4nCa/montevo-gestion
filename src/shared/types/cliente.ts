@@ -16,6 +16,7 @@ export type TipoPublicacion = 'publicacion' | 'reel';
 
 export interface Representante {
   nombre: string;
+  cedula: string;
   cargo?: string;
   telefono?: string;
   email?: string;
@@ -29,6 +30,7 @@ export interface RedSocial {
 export interface Cliente {
   id: string;
   nombreCliente: string;
+  ubicacion: string;
   telefono?: string;
   email?: string;
   representante: Representante;

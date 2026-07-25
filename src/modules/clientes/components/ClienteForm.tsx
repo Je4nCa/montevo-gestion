@@ -15,6 +15,7 @@ import type { ClienteInput } from '@/shared/types/cliente';
 
 const representanteSchema = z.object({
   nombre: z.string().min(1, 'Requerido'),
+  cedula: z.string().min(1, 'Requerido'),
   cargo: z.string().optional(),
   telefono: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
@@ -27,6 +28,7 @@ const redSocialSchema = z.object({
 
 const clienteSchema = z.object({
   nombreCliente: z.string().min(1, 'El nombre del cliente es requerido'),
+  ubicacion: z.string().min(1, 'Requerido'),
   telefono: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   representante: representanteSchema,
@@ -45,9 +47,10 @@ export type ClienteFormValues = z.infer<typeof clienteSchema>;
 
 const VALORES_POR_DEFECTO: ClienteFormValues = {
   nombreCliente: '',
+  ubicacion: '',
   telefono: '',
   email: '',
-  representante: { nombre: '', cargo: '', telefono: '', email: '' },
+  representante: { nombre: '', cedula: '', cargo: '', telefono: '', email: '' },
   redesSociales: [],
   paqueteId: 'esencial',
   addOnsActivos: [],
@@ -101,6 +104,9 @@ export function ClienteForm({
           <Campo label="Nombre del cliente / negocio" error={errors.nombreCliente?.message}>
             <Input {...register('nombreCliente')} />
           </Campo>
+          <Campo label="Ubicación" error={errors.ubicacion?.message}>
+            <Input placeholder="Ej. Grecia, Alajuela, Costa Rica" {...register('ubicacion')} />
+          </Campo>
           <Campo label="Teléfono">
             <Input {...register('telefono')} />
           </Campo>
@@ -115,6 +121,9 @@ export function ClienteForm({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Campo label="Nombre" error={errors.representante?.nombre?.message}>
             <Input {...register('representante.nombre')} />
+          </Campo>
+          <Campo label="Cédula" error={errors.representante?.cedula?.message}>
+            <Input placeholder="1-1919-0376" {...register('representante.cedula')} />
           </Campo>
           <Campo label="Cargo">
             <Input {...register('representante.cargo')} />

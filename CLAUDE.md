@@ -88,6 +88,10 @@ publicitarias, soporte prioritario.
   escribir sus propios datos.
 - **Gráficos:** Recharts (para reportes/dashboards)
 - **Animaciones:** Framer Motion
+- **Generación de PDF:** `@react-pdf/renderer` (acuerdos de servicio,
+  compuestos declarativamente y renderizados 100% en el cliente, sin backend)
+- **Firma digital:** `signature_pad` (captura de firma táctil en canvas,
+  confiable en iOS/Android)
 - **Multiplataforma:** Capacitor (iOS/Android) — configurar después de tener
   la web estable, no desde el inicio
 - **CI/CD:** GitHub Actions → GitHub Pages o Firebase Hosting
@@ -105,6 +109,10 @@ compartidos y un perfil central.
 ```
 negocio/{uid}
   /clientes
+  /publicaciones
+  /acuerdos        (contratos generados, con PDF firmado en base64)
+  /contadores      (consecutivo anual para la numeración de acuerdos)
+  /config          (ajustes del negocio, ej. firma reutilizable de Jean)
   /productos       (o /servicios, según tu rubro)
   /ventas
   /gastos
@@ -144,9 +152,9 @@ src/
   restringido a un único correo (`src/shared/constants/auth.ts`) tanto en
   cliente como en `firestore.rules` — no hay registro público
 - **Clientes (módulo principal del MVP):**
-  - Ficha de cliente: nombre del negocio/cliente, datos de contacto,
-    representante (nombre, cargo, teléfono, email)
-  - Acuerdo: fecha de inicio, paquete contratado, add-ons activos, si
+  - Ficha de cliente: nombre del negocio/cliente, ubicación, datos de
+    contacto, representante (nombre, cédula, cargo, teléfono, email)
+  - Acuerdo (ficha): fecha de inicio, paquete contratado, add-ons activos, si
     califica para descuento en add-ons
   - Publicaciones: cantidad incluida según paquete, publicaciones usadas del
     período, publicaciones restantes (calculado)
@@ -154,6 +162,22 @@ src/
   - Pagos: día de pago acordado, método de pago, estado (al día / pendiente)
   - Notas/acuerdos particulares (texto libre)
   - CRUD completo: crear, editar, eliminar/desactivar cliente
+  - **Acuerdos (submódulo, `src/modules/clientes/acuerdos/`):** genera el
+    contrato de servicios en PDF a partir de los datos del cliente y su
+    paquete (texto legal fijo, tabla de servicios por paquete en
+    `src/shared/constants/serviciosPorPaquete.ts`, datos fijos de Montevo en
+    `src/shared/constants/montevo.ts`). Firma **en persona**: el cliente
+    firma con el dedo directo en el celular de Jean (sin portal remoto). La
+    firma de Jean se captura una vez y se reutiliza automáticamente
+    (`negocio/{uid}/config/firmaMontevo`). Numeración `MV-{año}-{consecutivo
+    3 dígitos}-A`, autoincremental por año vía `runTransaction` sobre
+    `negocio/{uid}/contadores/{año}`. Al firmar se genera un único PDF que
+    queda guardado en el acuerdo (Firestore, base64) y se descarga al
+    momento para enviárselo al cliente. Los acuerdos son inmutables una vez
+    firmados — no hay edición, solo generar uno nuevo. El PDF usa Poppins
+    embebida (no la fuente estándar del generador) para fidelidad de marca,
+    más Noto Sans como *fallback* únicamente para el glifo ₡ (colón), que
+    Poppins no incluye — ver `src/assets/fonts/`.
 - **Reportes (futuro, no MVP):** clientes por paquete, publicaciones
   pendientes, próximos pagos
 - **Admin (futuro):** configuración general, catálogo de paquetes editable

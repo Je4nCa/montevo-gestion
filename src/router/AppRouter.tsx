@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/router/ProtectedRoute';
 import { ClientesListPage } from '@/modules/clientes/pages/ClientesListPage';
 import { ClienteNuevoPage } from '@/modules/clientes/pages/ClienteNuevoPage';
 import { ClienteDetailPage } from '@/modules/clientes/pages/ClienteDetailPage';
+import { NuevoAcuerdoPage } from '@/modules/clientes/acuerdos/pages/NuevoAcuerdoPage';
 
 export function AppRouter() {
   return (
@@ -31,6 +32,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <ClienteDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/clientes/:id/acuerdo/nuevo"
+          element={
+            <ProtectedRoute>
+              <NuevoAcuerdoPage />
             </ProtectedRoute>
           }
         />
