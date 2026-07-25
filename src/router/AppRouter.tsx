@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { LoginForm } from '@/modules/auth/components/LoginForm';
 import { ProtectedRoute } from '@/router/ProtectedRoute';
 import { ClientesListPage } from '@/modules/clientes/pages/ClientesListPage';
@@ -7,7 +7,7 @@ import { ClienteDetailPage } from '@/modules/clientes/pages/ClienteDetailPage';
 
 export function AppRouter() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route
@@ -35,6 +35,6 @@ export function AppRouter() {
           }
         />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

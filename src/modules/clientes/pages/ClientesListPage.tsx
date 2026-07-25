@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { MONTEVITO_URL } from '@/shared/lib/assets';
 import type { PaqueteId } from '@/shared/types/cliente';
 
 const BADGE_POR_NIVEL: Record<number, 'secondary' | 'outline' | 'default' | 'warning' | 'success'> = {
@@ -86,7 +87,7 @@ export function ClientesListPage() {
         <p className="text-muted-foreground">Cargando clientes…</p>
       ) : clientesFiltrados.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-montevo-rosa py-16 text-center">
-          <img src="/assets/Montevito.png" alt="" className="h-20 w-20 object-contain opacity-80" />
+          <img src={MONTEVITO_URL} alt="" className="h-20 w-20 object-contain opacity-80" />
           <p className="text-lg font-medium text-montevo-negro">
             {clientes && clientes.length > 0 ? 'No hay clientes que coincidan' : 'Aún no tienes clientes registrados'}
           </p>

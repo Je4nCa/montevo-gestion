@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { MONTEVITO_URL } from '@/shared/lib/assets';
 
 export function LoginForm() {
   const [password, setPassword] = useState('');
@@ -26,7 +27,7 @@ export function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-montevo-negroPuro px-4">
       <Card className="w-full max-w-sm bg-montevo-crema">
         <CardHeader className="items-center text-center">
-          <img src="/assets/Montevito.png" alt="Montevo Studio" className="mb-2 h-16 w-16 object-contain" />
+          <img src={MONTEVITO_URL} alt="Montevo Studio" className="mb-2 h-16 w-16 object-contain" />
           <CardTitle className="font-display text-2xl">montevo · studio</CardTitle>
           <CardDescription>Ingresa tu clave para gestionar los clientes</CardDescription>
         </CardHeader>
