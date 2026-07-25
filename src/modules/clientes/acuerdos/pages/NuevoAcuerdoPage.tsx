@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Download, FileCheck2 } from 'lucide-react';
+import { ArrowLeft, Download, FileCheck2, X } from 'lucide-react';
 import { useCliente } from '@/modules/clientes/hooks/useCliente';
 import { useFirmaMontevo } from '@/modules/clientes/acuerdos/hooks/useFirmaMontevo';
 import { useAcuerdos } from '@/modules/clientes/acuerdos/hooks/useAcuerdos';
@@ -157,26 +157,20 @@ export function NuevoAcuerdoPage() {
         </Card>
       )}
 
-      {paso === 'firma_montevo' && (
+      {paso === 'firma_montevo' && firmaMontevoActual && !montevoFirmandoDeNuevo && (
         <Card>
           <CardHeader>
             <CardTitle>Firma de Montevo Studio</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            {firmaMontevoActual && !montevoFirmandoDeNuevo ? (
-              <>
-                <img
-                  src={firmaMontevoActual}
-                  alt="Firma de Montevo Studio"
-                  className="h-32 w-full rounded-md border border-input bg-white object-contain"
-                />
-                <Button variant="outline" size="sm" onClick={() => setMontevoFirmandoDeNuevo(true)}>
-                  Firmar de nuevo
-                </Button>
-              </>
-            ) : (
-              <FirmaCanvas ref={canvasMontevoRef} />
-            )}
+            <img
+              src={firmaMontevoActual}
+              alt="Firma de Montevo Studio"
+              className="h-32 w-full rounded-md border border-input bg-white object-contain"
+            />
+            <Button variant="outline" size="sm" onClick={() => setMontevoFirmandoDeNuevo(true)}>
+              Firmar de nuevo
+            </Button>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button onClick={confirmarFirmaMontevo} size="lg">
               Continuar
@@ -185,22 +179,29 @@ export function NuevoAcuerdoPage() {
         </Card>
       )}
 
+      {paso === 'firma_montevo' && (!firmaMontevoActual || montevoFirmandoDeNuevo) && (
+        <PantallaFirma
+          titulo="Firma de Montevo Studio"
+          canvasRef={canvasMontevoRef}
+          error={error}
+          onConfirmar={confirmarFirmaMontevo}
+          onCancelar={() =>
+            montevoFirmandoDeNuevo ? setMontevoFirmandoDeNuevo(false) : setPaso('revision')
+          }
+          confirmarLabel="Continuar"
+        />
+      )}
+
       {paso === 'firma_cliente' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Firma del cliente</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <p className="text-muted-foreground">
-              Pásale el celular a {cliente.representante.nombre} para que firme aquí abajo.
-            </p>
-            <FirmaCanvas ref={canvasClienteRef} />
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button onClick={confirmarFirmaCliente} size="lg">
-              Confirmar firma
-            </Button>
-          </CardContent>
-        </Card>
+        <PantallaFirma
+          titulo="Firma del cliente"
+          subtitulo={`Pásale el celular a ${cliente.representante.nombre} para que firme`}
+          canvasRef={canvasClienteRef}
+          error={error}
+          onConfirmar={confirmarFirmaCliente}
+          onCancelar={() => setPaso('firma_montevo')}
+          confirmarLabel="Confirmar firma"
+        />
       )}
 
       {paso === 'generando' && (
@@ -239,6 +240,63 @@ export function NuevoAcuerdoPage() {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+function PantallaFirma({
+  titulo,
+  subtitulo,
+  canvasRef,
+  error,
+  onConfirmar,
+  onCancelar,
+  confirmarLabel,
+}: {
+  titulo: string;
+  subtitulo?: string;
+  canvasRef: React.RefObject<FirmaCanvasHandle>;
+  error: string | null;
+  onConfirmar: () => void;
+  onCancelar: () => void;
+  confirmarLabel: string;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-montevo-crema">
+      <div className="flex items-center justify-between gap-3 border-b border-montevo-rosa/60 px-4 py-3">
+        <div className="min-w-0">
+          <p className="truncate font-display text-lg font-semibold text-montevo-negro">{titulo}</p>
+          {subtitulo && <p className="truncate text-sm text-muted-foreground">{subtitulo}</p>}
+        </div>
+        <button
+          type="button"
+          onClick={onCancelar}
+          aria-label="Cancelar"
+          className="shrink-0 rounded-full p-2 text-montevo-negro transition-colors hover:bg-montevo-rosa/40"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col gap-2 p-4">
+        <FirmaCanvas ref={canvasRef} canvasClassName="flex-1" mostrarBotonLimpiar={false} />
+        {error && <p className="text-sm text-destructive">{error}</p>}
+      </div>
+
+      <div className="flex gap-3 border-t border-montevo-rosa/60 p-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          size="lg"
+          onClick={() => canvasRef.current?.limpiar()}
+        >
+          Limpiar
+        </Button>
+        <Button type="button" className="flex-1" size="lg" onClick={onConfirmar}>
+          {confirmarLabel}
+        </Button>
+      </div>
     </div>
   );
 }

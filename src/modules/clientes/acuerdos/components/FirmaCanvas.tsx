@@ -1,13 +1,22 @@
 import { useEffect, useImperativeHandle, useRef, forwardRef } from 'react';
 import SignaturePad from 'signature_pad';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/shared/lib/utils';
 
 export interface FirmaCanvasHandle {
   obtenerFirma: () => string | null;
   limpiar: () => void;
 }
 
-export const FirmaCanvas = forwardRef<FirmaCanvasHandle>(function FirmaCanvas(_props, ref) {
+interface FirmaCanvasProps {
+  canvasClassName?: string;
+  mostrarBotonLimpiar?: boolean;
+}
+
+export const FirmaCanvas = forwardRef<FirmaCanvasHandle, FirmaCanvasProps>(function FirmaCanvas(
+  { canvasClassName, mostrarBotonLimpiar = true },
+  ref,
+) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const padRef = useRef<SignaturePad | null>(null);
 
@@ -17,11 +26,15 @@ export const FirmaCanvas = forwardRef<FirmaCanvasHandle>(function FirmaCanvas(_p
 
     function resize() {
       if (!canvas) return;
+      const datosPrevios = padRef.current?.toData();
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
       canvas.width = canvas.offsetWidth * ratio;
       canvas.height = canvas.offsetHeight * ratio;
       canvas.getContext('2d')?.scale(ratio, ratio);
       padRef.current?.clear();
+      if (datosPrevios && datosPrevios.length > 0) {
+        padRef.current?.fromData(datosPrevios);
+      }
     }
 
     padRef.current = new SignaturePad(canvas, {
@@ -30,8 +43,10 @@ export const FirmaCanvas = forwardRef<FirmaCanvasHandle>(function FirmaCanvas(_p
     });
     resize();
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', resize);
     return () => {
       window.removeEventListener('resize', resize);
+      window.removeEventListener('orientationchange', resize);
       padRef.current?.off();
     };
   }, []);
@@ -45,14 +60,19 @@ export const FirmaCanvas = forwardRef<FirmaCanvasHandle>(function FirmaCanvas(_p
   }));
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
       <canvas
         ref={canvasRef}
-        className="h-48 w-full touch-none rounded-md border border-input bg-white"
+        className={cn(
+          'min-h-0 w-full touch-none rounded-md border border-input bg-white',
+          canvasClassName ?? 'h-48',
+        )}
       />
-      <Button type="button" variant="outline" size="sm" onClick={() => padRef.current?.clear()}>
-        Limpiar
-      </Button>
+      {mostrarBotonLimpiar && (
+        <Button type="button" variant="outline" size="sm" onClick={() => padRef.current?.clear()}>
+          Limpiar
+        </Button>
+      )}
     </div>
   );
 });
