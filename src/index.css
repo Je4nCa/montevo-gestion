@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/*
+  Noe Display es de licencia paga y no viene incluida en el proyecto.
+  Si tienes los archivos con licencia, colócalos en src/assets/fonts/
+  y agrega aquí un @font-face; mientras tanto se usa el fallback `serif`
+  definido en tailwind.config.ts.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 32 33% 93%;
+    --foreground: 30 12% 10%;
+
+    --card: 32 33% 96%;
+    --card-foreground: 30 12% 10%;
+
+    --popover: 32 33% 96%;
+    --popover-foreground: 30 12% 10%;
+
+    --primary: 27 30% 51%;
+    --primary-foreground: 32 40% 97%;
+
+    --secondary: 27 25% 30%;
+    --secondary-foreground: 32 40% 97%;
+
+    --muted: 27 20% 85%;
+    --muted-foreground: 27 15% 35%;
+
+    --accent: 26 34% 79%;
+    --accent-foreground: 30 12% 10%;
+
+    --destructive: 4 65% 45%;
+    --destructive-foreground: 32 40% 97%;
+
+    --border: 27 20% 82%;
+    --input: 27 20% 82%;
+    --ring: 27 30% 51%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+}
