@@ -1,28 +1,38 @@
 import { create } from 'zustand';
 import {
+  GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   type User,
 } from 'firebase/auth';
 import { auth } from '@/shared/lib/firebase';
+import { CORREO_AUTORIZADO } from '@/shared/constants/auth';
 
 interface AuthState {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  error: string | null;
+  loginConGoogle: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>()(() => ({
+const googleProvider = new GoogleAuthProvider();
+
+export const useAuthStore = create<AuthState>()((set) => ({
   user: null,
   loading: true,
-  login: async (email: string, password: string) => {
+  error: null,
+  loginConGoogle: async () => {
+    set({ error: null });
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      return true;
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result.user.email !== CORREO_AUTORIZADO) {
+        await signOut(auth);
+        set({ error: 'Esta aplicación es privada y solo un correo tiene acceso.' });
+      }
     } catch {
-      return false;
+      set({ error: 'No se pudo iniciar sesión. Intenta de nuevo.' });
     }
   },
   logout: async () => {

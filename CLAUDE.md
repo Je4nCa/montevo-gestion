@@ -140,9 +140,9 @@ src/
 
 ## Módulos de la app
 
-- **Auth:** Firebase Authentication, email/contraseña, dueño único (sin
-  registro público — el usuario se crea manualmente en la consola de
-  Firebase)
+- **Auth:** Firebase Authentication con Google Sign-In (`signInWithPopup`),
+  restringido a un único correo (`src/shared/constants/auth.ts`) tanto en
+  cliente como en `firestore.rules` — no hay registro público
 - **Clientes (módulo principal del MVP):**
   - Ficha de cliente: nombre del negocio/cliente, datos de contacto,
     representante (nombre, cargo, teléfono, email)
