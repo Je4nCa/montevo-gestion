@@ -31,7 +31,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
         await signOut(auth);
         set({ error: 'Esta aplicación es privada y solo un correo tiene acceso.' });
       }
-    } catch {
+    } catch (err) {
+      console.error('Error de Google Sign-In:', err);
       set({ error: 'No se pudo iniciar sesión. Intenta de nuevo.' });
     }
   },
