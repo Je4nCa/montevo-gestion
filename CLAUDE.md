@@ -81,10 +81,11 @@ publicitarias, soporte prioritario.
 - **Frontend:** React 18 + TypeScript + Vite
 - **Estilos:** TailwindCSS + shadcn/ui (Radix UI) — sin CSS inline, sin CSS modules
 - **Estado:** Zustand
-- **Almacenamiento local:** Dexie (IndexedDB) mientras no haya backend — permite
-  desarrollar y probar toda la app sin depender de un servidor desde el día uno
-- **Backend (cuando se necesite):** Firebase (Auth, Firestore, Cloud Functions,
-  Hosting) — o Supabase como alternativa si prefieres Postgres/SQL real
+- **Backend:** Firebase — Auth (email/contraseña, dueño único) + Firestore
+  (`negocio/{uid}/clientes`, `negocio/{uid}/publicaciones`), conectado desde
+  `src/shared/lib/firebase.ts`. Reglas de seguridad en `firestore.rules`
+  (raíz del repo) — solo el usuario autenticado con ese `uid` puede leer/
+  escribir sus propios datos.
 - **Gráficos:** Recharts (para reportes/dashboards)
 - **Animaciones:** Framer Motion
 - **Multiplataforma:** Capacitor (iOS/Android) — configurar después de tener
@@ -111,9 +112,9 @@ negocio/{uid}
 ```
 
 Cada módulo tiene su propio hook principal (`useClientes`, `useVentas`, etc.)
-que abstrae la fuente de datos (Dexie ahora, Firestore/Supabase después) —
-los componentes **nunca** llaman a la base de datos directamente, siempre
-pasan por el hook.
+que abstrae la fuente de datos (Firestore, vía `onSnapshot`) — los
+componentes **nunca** llaman a Firestore directamente, siempre pasan por
+el hook.
 
 Estructura de carpetas:
 
@@ -139,8 +140,9 @@ src/
 
 ## Módulos de la app
 
-- **Auth:** login simple (dueño único por ahora, mock local mientras no haya
-  backend)
+- **Auth:** Firebase Authentication, email/contraseña, dueño único (sin
+  registro público — el usuario se crea manualmente en la consola de
+  Firebase)
 - **Clientes (módulo principal del MVP):**
   - Ficha de cliente: nombre del negocio/cliente, datos de contacto,
     representante (nombre, cargo, teléfono, email)
@@ -209,10 +211,10 @@ src/
 1. Configurar `tailwind.config.ts` con la paleta y tipografías de Montevo
 2. Crear la estructura de carpetas `src/modules/` (empezar con `clientes`,
    dejar `auth` y `admin` mínimos)
-3. Crear `src/shared/lib/db.ts` con la abstracción Dexie → Firestore/Supabase,
+3. Crear `src/shared/lib/firebase.ts` con la inicialización de Firebase,
    y el catálogo de paquetes como constante (`src/shared/constants/paquetes.ts`)
 4. Construir el shell de la app: navegación simple (Clientes como pantalla
    principal)
-5. Implementar el flujo de auth mock (login local del dueño)
+5. Implementar el flujo de auth con Firebase Authentication (login del dueño)
 6. Módulo Clientes completo: listado, ficha de detalle, formulario de
    crear/editar, cálculo de publicaciones restantes

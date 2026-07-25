@@ -4,9 +4,14 @@ import { useAuthStore } from '@/modules/auth/store/useAuthStore';
 import { AppShell } from '@/shared/components/AppShell';
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
+  const loading = useAuthStore((s) => s.loading);
 
-  if (!isAuthenticated) {
+  if (loading) {
+    return null;
+  }
+
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 

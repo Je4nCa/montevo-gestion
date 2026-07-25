@@ -1,5 +1,7 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/shared/lib/db';
+import { useEffect, useState } from 'react';
+import { collection, addDoc, onSnapshot, query, where } from 'firebase/firestore';
+import { firestore } from '@/shared/lib/firebase';
+import { useAuthStore } from '@/modules/auth/store/useAuthStore';
 import type { Publicacion, PublicacionInput } from '@/shared/types/cliente';
 
 interface UsePublicacionesResult {
@@ -10,29 +12,46 @@ interface UsePublicacionesResult {
 }
 
 export function usePublicaciones(clienteId: string): UsePublicacionesResult {
-  const data = useLiveQuery(
-    () =>
-      db.publicaciones
-        .where('clienteId')
-        .equals(clienteId)
-        .reverse()
-        .sortBy('fecha'),
-    [clienteId],
-  );
+  const uid = useAuthStore((s) => s.user?.uid);
+  const [data, setData] = useState<Publicacion[] | undefined>(undefined);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!uid) {
+      setData([]);
+      return;
+    }
+    setData(undefined);
+    const publicacionesRef = query(
+      collection(firestore, 'negocio', uid, 'publicaciones'),
+      where('clienteId', '==', clienteId),
+    );
+    const unsubscribe = onSnapshot(
+      publicacionesRef,
+      (snapshot) => {
+        const publicaciones = snapshot.docs
+          .map((d) => ({ ...(d.data() as Omit<Publicacion, 'id'>), id: d.id }))
+          .sort((a, b) => b.fecha.localeCompare(a.fecha));
+        setData(publicaciones);
+        setError(null);
+      },
+      (err) => setError(err),
+    );
+    return unsubscribe;
+  }, [uid, clienteId]);
 
   async function agregar(input: PublicacionInput): Promise<void> {
-    const publicacion: Publicacion = {
+    if (!uid) throw new Error('No hay sesión activa');
+    await addDoc(collection(firestore, 'negocio', uid, 'publicaciones'), {
       ...input,
-      id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
-    };
-    await db.publicaciones.add(publicacion);
+    });
   }
 
   return {
     data,
     loading: data === undefined,
-    error: null,
+    error,
     agregar,
   };
 }

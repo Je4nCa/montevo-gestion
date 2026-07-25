@@ -1,25 +1,35 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  type User,
+} from 'firebase/auth';
+import { auth } from '@/shared/lib/firebase';
 
 interface AuthState {
-  isAuthenticated: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
 }
 
-const APP_PASSWORD = import.meta.env.VITE_APP_PASSWORD as string | undefined;
+export const useAuthStore = create<AuthState>()(() => ({
+  user: null,
+  loading: true,
+  login: async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  logout: async () => {
+    await signOut(auth);
+  },
+}));
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      isAuthenticated: false,
-      login: (password: string) => {
-        const ok = !!APP_PASSWORD && password === APP_PASSWORD;
-        if (ok) set({ isAuthenticated: true });
-        return ok;
-      },
-      logout: () => set({ isAuthenticated: false }),
-    }),
-    { name: 'montevo-auth' },
-  ),
-);
+onAuthStateChanged(auth, (user) => {
+  useAuthStore.setState({ user, loading: false });
+});
