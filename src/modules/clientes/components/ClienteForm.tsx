@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -86,14 +86,20 @@ export function ClienteForm({
   });
 
   const redesFieldArray = useFieldArray({ control, name: 'redesSociales' });
+  const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
 
   async function submit(values: ClienteFormValues) {
-    await onSubmit({
-      ...values,
-      telefono: values.telefono || undefined,
-      email: values.email || undefined,
-      notas: values.notas || undefined,
-    });
+    setErrorEnvio(null);
+    try {
+      await onSubmit({
+        ...values,
+        telefono: values.telefono || undefined,
+        email: values.email || undefined,
+        notas: values.notas || undefined,
+      });
+    } catch {
+      setErrorEnvio('No se pudo guardar el cliente. Intenta de nuevo.');
+    }
   }
 
   return (
@@ -285,6 +291,7 @@ export function ClienteForm({
         <Textarea rows={4} {...register('notas')} />
       </section>
 
+      {errorEnvio && <p className="text-sm text-destructive">{errorEnvio}</p>}
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
