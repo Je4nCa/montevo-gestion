@@ -1,5 +1,4 @@
 import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/renderer';
-import { getPaquete } from '@/shared/constants/paquetes';
 import { MONTEVO_INFO } from '@/shared/constants/montevo';
 import type { AcuerdoDocumentData } from '@/shared/types/acuerdo';
 import poppinsRegular from '@/assets/fonts/Poppins-Regular.ttf';
@@ -103,8 +102,6 @@ function formatFechaPdf(iso: string): string {
 }
 
 export function AcuerdoDocument({ datos }: { datos: AcuerdoDocumentData }) {
-  const paquete = getPaquete(datos.paqueteId);
-
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
@@ -146,7 +143,7 @@ export function AcuerdoDocument({ datos }: { datos: AcuerdoDocumentData }) {
         <Text style={styles.clausulaTitulo}>PRIMERA — OBJETO DEL CONTRATO</Text>
         <Text style={styles.parrafo}>
           Montevo Studio prestará al Cliente servicios de gestión de redes sociales, publicidad,
-          diseño de contenido y producción audiovisual, bajo el paquete "{paquete.nombre}", con el
+          diseño de contenido y producción audiovisual, bajo el paquete "{datos.paqueteNombre}", con el
           fin de fortalecer la presencia digital y el crecimiento de marca del Cliente.
         </Text>
 

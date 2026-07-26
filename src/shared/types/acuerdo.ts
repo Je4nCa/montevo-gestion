@@ -1,9 +1,4 @@
-import type { PaqueteId } from '@/shared/types/cliente';
-
-export interface ServicioIncluido {
-  servicio: string;
-  detalle: string;
-}
+import type { PaqueteClienteId, ServicioIncluido } from '@/shared/types/cliente';
 
 export interface ClienteSnapshotAcuerdo {
   nombreCliente: string;
@@ -19,7 +14,8 @@ export interface Acuerdo {
   anio: number;
   consecutivo: number;
   fecha: string;
-  paqueteId: PaqueteId;
+  paqueteId: PaqueteClienteId;
+  paqueteNombre: string;
   precioMensual: number;
   precioEnPalabras: string;
   serviciosIncluidos: ServicioIncluido[];

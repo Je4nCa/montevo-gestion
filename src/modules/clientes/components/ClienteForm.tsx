@@ -26,22 +26,90 @@ const redSocialSchema = z.object({
   urlOHandle: z.string().min(1, 'Requerido'),
 });
 
-const clienteSchema = z.object({
-  nombreCliente: z.string().min(1, 'El nombre del cliente es requerido'),
-  ubicacion: z.string().min(1, 'Requerido'),
-  telefono: z.string().optional(),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
-  representante: representanteSchema,
-  redesSociales: z.array(redSocialSchema),
-  paqueteId: z.enum(['esencial', 'emprendedor', 'profesional', 'negocio', 'corporativo']),
-  addOnsActivos: z.array(z.string()),
-  calificaDescuentoAddOns: z.boolean(),
-  fechaInicioAcuerdo: z.string().min(1, 'Requerido'),
-  diaPago: z.coerce.number().int().min(1).max(31),
-  metodoPago: z.enum(['sinpe', 'transferencia', 'efectivo', 'tarjeta', 'otro']),
-  estadoPago: z.enum(['al_dia', 'pendiente']),
-  notas: z.string().optional(),
+const servicioIncluidoSchema = z.object({
+  servicio: z.string(),
+  detalle: z.string(),
 });
+
+const paquetePersonalizadoSchema = z.object({
+  nombre: z.string(),
+  precioMensual: z.coerce.number(),
+  precioEnPalabras: z.string(),
+  publicacionesIncluidas: z.coerce.number(),
+  reelsIncluidos: z.coerce.number(),
+  servicios: z.array(servicioIncluidoSchema),
+});
+
+const clienteSchema = z
+  .object({
+    nombreCliente: z.string().min(1, 'El nombre del cliente es requerido'),
+    ubicacion: z.string().min(1, 'Requerido'),
+    telefono: z.string().optional(),
+    email: z.string().email('Email inválido').optional().or(z.literal('')),
+    representante: representanteSchema,
+    redesSociales: z.array(redSocialSchema),
+    paqueteId: z.enum([
+      'esencial',
+      'emprendedor',
+      'profesional',
+      'negocio',
+      'corporativo',
+      'personalizado',
+    ]),
+    paquetePersonalizado: paquetePersonalizadoSchema,
+    addOnsActivos: z.array(z.string()),
+    calificaDescuentoAddOns: z.boolean(),
+    fechaInicioAcuerdo: z.string().min(1, 'Requerido'),
+    diaPago: z.coerce.number().int().min(1).max(31),
+    metodoPago: z.enum(['sinpe', 'transferencia', 'efectivo', 'tarjeta', 'otro']),
+    estadoPago: z.enum(['al_dia', 'pendiente']),
+    notas: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.paqueteId !== 'personalizado') return;
+    const p = data.paquetePersonalizado;
+    if (!p.nombre.trim()) {
+      ctx.addIssue({ code: 'custom', path: ['paquetePersonalizado', 'nombre'], message: 'Requerido' });
+    }
+    if (!(p.precioMensual > 0)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['paquetePersonalizado', 'precioMensual'],
+        message: 'Debe ser mayor a 0',
+      });
+    }
+    if (!p.precioEnPalabras.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['paquetePersonalizado', 'precioEnPalabras'],
+        message: 'Requerido',
+      });
+    }
+    if (p.servicios.length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['paquetePersonalizado', 'servicios'],
+        message: 'Agrega al menos un servicio',
+      });
+    } else {
+      p.servicios.forEach((s, i) => {
+        if (!s.servicio.trim()) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['paquetePersonalizado', 'servicios', i, 'servicio'],
+            message: 'Requerido',
+          });
+        }
+        if (!s.detalle.trim()) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['paquetePersonalizado', 'servicios', i, 'detalle'],
+            message: 'Requerido',
+          });
+        }
+      });
+    }
+  });
 
 export type ClienteFormValues = z.infer<typeof clienteSchema>;
 
@@ -53,6 +121,14 @@ const VALORES_POR_DEFECTO: ClienteFormValues = {
   representante: { nombre: '', cedula: '', cargo: '', telefono: '', email: '' },
   redesSociales: [],
   paqueteId: 'esencial',
+  paquetePersonalizado: {
+    nombre: '',
+    precioMensual: 0,
+    precioEnPalabras: '',
+    publicacionesIncluidas: 0,
+    reelsIncluidos: 0,
+    servicios: [],
+  },
   addOnsActivos: [],
   calificaDescuentoAddOns: false,
   fechaInicioAcuerdo: new Date().toISOString().slice(0, 10),
@@ -79,6 +155,7 @@ export function ClienteForm({
     register,
     control,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ClienteFormValues>({
     resolver: zodResolver(clienteSchema),
@@ -86,7 +163,13 @@ export function ClienteForm({
   });
 
   const redesFieldArray = useFieldArray({ control, name: 'redesSociales' });
+  const serviciosFieldArray = useFieldArray({
+    control,
+    name: 'paquetePersonalizado.servicios',
+  });
   const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
+  const paqueteId = watch('paqueteId');
+  const esPersonalizado = paqueteId === 'personalizado';
 
   async function submit(values: ClienteFormValues) {
     setErrorEnvio(null);
@@ -96,6 +179,7 @@ export function ClienteForm({
         telefono: values.telefono || undefined,
         email: values.email || undefined,
         notas: values.notas || undefined,
+        paquetePersonalizado: values.paqueteId === 'personalizado' ? values.paquetePersonalizado : undefined,
       });
     } catch {
       setErrorEnvio('No se pudo guardar el cliente. Intenta de nuevo.');
@@ -161,6 +245,7 @@ export function ClienteForm({
                         {p.nombre}
                       </SelectItem>
                     ))}
+                    <SelectItem value="personalizado">Personalizado</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -170,6 +255,104 @@ export function ClienteForm({
             <Input type="date" {...register('fechaInicioAcuerdo')} />
           </Campo>
         </div>
+
+        {esPersonalizado && (
+          <div className="flex flex-col gap-4 rounded-md border border-montevo-rosa/60 p-4">
+            <p className="text-sm font-medium text-montevo-cafeOscuro">
+              Paquete personalizado — define el precio y los servicios para este cliente
+            </p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Campo
+                label="Nombre del paquete"
+                error={errors.paquetePersonalizado?.nombre?.message}
+              >
+                <Input placeholder="Ej. Plan Jimmy" {...register('paquetePersonalizado.nombre')} />
+              </Campo>
+              <Campo
+                label="Precio mensual (₡)"
+                error={errors.paquetePersonalizado?.precioMensual?.message}
+              >
+                <Input type="number" min={0} {...register('paquetePersonalizado.precioMensual')} />
+              </Campo>
+              <Campo
+                label="Precio en letras (para el contrato)"
+                error={errors.paquetePersonalizado?.precioEnPalabras?.message}
+              >
+                <Input
+                  placeholder="Ej. cuarenta mil colones"
+                  {...register('paquetePersonalizado.precioEnPalabras')}
+                />
+              </Campo>
+              <div className="grid grid-cols-2 gap-4">
+                <Campo label="Publicaciones incluidas">
+                  <Input
+                    type="number"
+                    min={0}
+                    {...register('paquetePersonalizado.publicacionesIncluidas')}
+                  />
+                </Campo>
+                <Campo label="Reels incluidos">
+                  <Input type="number" min={0} {...register('paquetePersonalizado.reelsIncluidos')} />
+                </Campo>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <Label>Servicios incluidos (tabla del contrato)</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => serviciosFieldArray.append({ servicio: '', detalle: '' })}
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar servicio
+                </Button>
+              </div>
+              {errors.paquetePersonalizado?.servicios?.message && (
+                <p className="text-sm text-destructive">
+                  {errors.paquetePersonalizado.servicios.message}
+                </p>
+              )}
+              {serviciosFieldArray.fields.length === 0 && (
+                <p className="text-sm text-muted-foreground">Sin servicios agregados.</p>
+              )}
+              <div className="flex flex-col gap-3">
+                {serviciosFieldArray.fields.map((field, index) => (
+                  <div key={field.id} className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Servicio (ej. Publicaciones)"
+                        {...register(`paquetePersonalizado.servicios.${index}.servicio`)}
+                      />
+                      {errors.paquetePersonalizado?.servicios?.[index]?.servicio && (
+                        <p className="mt-1 text-sm text-destructive">Requerido</p>
+                      )}
+                    </div>
+                    <div className="flex-[2]">
+                      <Input
+                        placeholder="Detalle (ej. 4 publicaciones profesionales mensuales)"
+                        {...register(`paquetePersonalizado.servicios.${index}.detalle`)}
+                      />
+                      {errors.paquetePersonalizado?.servicios?.[index]?.detalle && (
+                        <p className="mt-1 text-sm text-destructive">Requerido</p>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => serviciosFieldArray.remove(index)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div>
           <Label className="mb-2 block">Add-ons activos</Label>

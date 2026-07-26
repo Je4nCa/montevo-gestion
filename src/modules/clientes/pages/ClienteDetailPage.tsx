@@ -7,7 +7,7 @@ import { ClienteForm } from '@/modules/clientes/components/ClienteForm';
 import { PublicacionesLog } from '@/modules/clientes/components/PublicacionesLog';
 import { useAcuerdos } from '@/modules/clientes/acuerdos/hooks/useAcuerdos';
 import { descargarPdf, base64ToBlob } from '@/modules/clientes/acuerdos/lib/generarPdf';
-import { getPaquete } from '@/shared/constants/paquetes';
+import { resolverPaquete } from '@/shared/lib/paqueteCliente';
 import { getAddOn } from '@/shared/constants/addOns';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -68,7 +68,7 @@ export function ClienteDetailPage() {
     );
   }
 
-  const paquete = getPaquete(cliente.paqueteId);
+  const paquete = resolverPaquete(cliente);
 
   async function handleUpdate(values: ClienteInput) {
     await actualizar(cliente!.id, values);
@@ -215,7 +215,7 @@ export function ClienteDetailPage() {
           <CardTitle>Publicaciones</CardTitle>
         </CardHeader>
         <CardContent>
-          <PublicacionesLog clienteId={cliente.id} paqueteId={cliente.paqueteId} />
+          <PublicacionesLog cliente={cliente} />
         </CardContent>
       </Card>
 
@@ -233,7 +233,7 @@ export function ClienteDetailPage() {
                   <div>
                     <p className="font-medium text-montevo-negro">{acuerdo.numero}</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatFecha(acuerdo.fecha)} · {getPaquete(acuerdo.paqueteId).nombre}
+                      {formatFecha(acuerdo.fecha)} · {acuerdo.paqueteNombre}
                     </p>
                   </div>
                   <Button

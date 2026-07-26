@@ -1,16 +1,10 @@
 import { usePublicaciones, contarPublicacionesDelMes } from '@/modules/clientes/hooks/usePublicaciones';
-import { getPaquete } from '@/shared/constants/paquetes';
-import type { PaqueteId } from '@/shared/types/cliente';
+import { resolverPaquete } from '@/shared/lib/paqueteCliente';
+import type { Cliente } from '@/shared/types/cliente';
 
-export function PublicacionesRestantes({
-  clienteId,
-  paqueteId,
-}: {
-  clienteId: string;
-  paqueteId: PaqueteId;
-}) {
-  const { data: publicaciones, loading } = usePublicaciones(clienteId);
-  const paquete = getPaquete(paqueteId);
+export function PublicacionesRestantes({ cliente }: { cliente: Cliente }) {
+  const { data: publicaciones, loading } = usePublicaciones(cliente.id);
+  const paquete = resolverPaquete(cliente);
   const usadas = contarPublicacionesDelMes(publicaciones);
   const incluidas = paquete.publicacionesIncluidas;
   const restantes = Math.max(incluidas - usadas, 0);

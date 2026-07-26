@@ -1,4 +1,19 @@
 export type PaqueteId = 'esencial' | 'emprendedor' | 'profesional' | 'negocio' | 'corporativo';
+export type PaqueteClienteId = PaqueteId | 'personalizado';
+
+export interface ServicioIncluido {
+  servicio: string;
+  detalle: string;
+}
+
+export interface PaquetePersonalizado {
+  nombre: string;
+  precioMensual: number;
+  precioEnPalabras: string;
+  publicacionesIncluidas: number;
+  reelsIncluidos: number;
+  servicios: ServicioIncluido[];
+}
 
 export type PlataformaRedSocial =
   | 'instagram'
@@ -35,7 +50,8 @@ export interface Cliente {
   email?: string;
   representante: Representante;
   redesSociales: RedSocial[];
-  paqueteId: PaqueteId;
+  paqueteId: PaqueteClienteId;
+  paquetePersonalizado?: PaquetePersonalizado;
   addOnsActivos: string[];
   calificaDescuentoAddOns: boolean;
   fechaInicioAcuerdo: string;

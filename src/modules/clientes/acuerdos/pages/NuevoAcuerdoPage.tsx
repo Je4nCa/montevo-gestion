@@ -6,8 +6,7 @@ import { useFirmaMontevo } from '@/modules/clientes/acuerdos/hooks/useFirmaMonte
 import { useAcuerdos } from '@/modules/clientes/acuerdos/hooks/useAcuerdos';
 import { FirmaCanvas, type FirmaCanvasHandle } from '@/modules/clientes/acuerdos/components/FirmaCanvas';
 import { descargarPdf } from '@/modules/clientes/acuerdos/lib/generarPdf';
-import { getPaquete } from '@/shared/constants/paquetes';
-import { getServiciosIncluidos } from '@/shared/constants/serviciosPorPaquete';
+import { resolverPaquete, resolverServiciosIncluidos } from '@/shared/lib/paqueteCliente';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatColones } from '@/shared/lib/utils';
@@ -47,8 +46,8 @@ export function NuevoAcuerdoPage() {
     );
   }
 
-  const paquete = getPaquete(cliente.paqueteId);
-  const servicios = getServiciosIncluidos(cliente.paqueteId);
+  const paquete = resolverPaquete(cliente);
+  const servicios = resolverServiciosIncluidos(cliente);
   const firmaMontevoActual = firmaMontevoNueva ?? firmaMontevo.data ?? '';
 
   async function confirmarFirmaMontevo() {
@@ -83,6 +82,7 @@ export function NuevoAcuerdoPage() {
         clienteId: id!,
         fecha: new Date().toISOString(),
         paqueteId: cliente!.paqueteId,
+        paqueteNombre: paquete.nombre,
         precioMensual: paquete.precioMensual,
         precioEnPalabras: paquete.precioEnPalabras,
         serviciosIncluidos: servicios,

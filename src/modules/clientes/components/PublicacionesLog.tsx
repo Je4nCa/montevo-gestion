@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Plus } from 'lucide-react';
 import { usePublicaciones, contarPublicacionesDelMes } from '@/modules/clientes/hooks/usePublicaciones';
-import { getPaquete } from '@/shared/constants/paquetes';
+import { resolverPaquete } from '@/shared/lib/paqueteCliente';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,11 +15,12 @@ import {
 } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { formatFecha } from '@/shared/lib/utils';
-import type { PaqueteId, TipoPublicacion } from '@/shared/types/cliente';
+import type { Cliente, TipoPublicacion } from '@/shared/types/cliente';
 
-export function PublicacionesLog({ clienteId, paqueteId }: { clienteId: string; paqueteId: PaqueteId }) {
+export function PublicacionesLog({ cliente }: { cliente: Cliente }) {
+  const clienteId = cliente.id;
   const { data: publicaciones, loading, agregar } = usePublicaciones(clienteId);
-  const paquete = getPaquete(paqueteId);
+  const paquete = resolverPaquete(cliente);
   const usadas = contarPublicacionesDelMes(publicaciones);
   const [open, setOpen] = useState(false);
   const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));

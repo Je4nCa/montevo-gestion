@@ -1,6 +1,5 @@
 import { getPaquete } from '@/shared/constants/paquetes';
-import type { PaqueteId } from '@/shared/types/cliente';
-import type { ServicioIncluido } from '@/shared/types/acuerdo';
+import type { PaqueteId, ServicioIncluido } from '@/shared/types/cliente';
 
 function detallePublicaciones(paqueteId: PaqueteId): string {
   const paquete = getPaquete(paqueteId);

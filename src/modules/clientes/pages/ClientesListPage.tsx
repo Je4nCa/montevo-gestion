@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import { useClientes } from '@/modules/clientes/hooks/useClientes';
 import { PublicacionesRestantes } from '@/modules/clientes/components/PublicacionesRestantes';
-import { PAQUETES, getPaquete } from '@/shared/constants/paquetes';
+import { PAQUETES } from '@/shared/constants/paquetes';
+import { resolverPaquete } from '@/shared/lib/paqueteCliente';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +17,8 @@ import {
 } from '@/components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { MONTEVITO_URL } from '@/shared/lib/assets';
-import type { PaqueteId } from '@/shared/types/cliente';
+import { getPaquete } from '@/shared/constants/paquetes';
+import type { PaqueteClienteId } from '@/shared/types/cliente';
 
 const BADGE_POR_NIVEL: Record<number, 'secondary' | 'outline' | 'default' | 'warning' | 'success'> = {
   0: 'outline',
@@ -29,7 +31,7 @@ const BADGE_POR_NIVEL: Record<number, 'secondary' | 'outline' | 'default' | 'war
 export function ClientesListPage() {
   const { data: clientes, loading } = useClientes();
   const [busqueda, setBusqueda] = useState('');
-  const [filtroPaquete, setFiltroPaquete] = useState<PaqueteId | 'todos'>('todos');
+  const [filtroPaquete, setFiltroPaquete] = useState<PaqueteClienteId | 'todos'>('todos');
 
   const clientesFiltrados = useMemo(() => {
     if (!clientes) return [];
@@ -68,7 +70,10 @@ export function ClientesListPage() {
             onChange={(e) => setBusqueda(e.target.value)}
           />
         </div>
-        <Select value={filtroPaquete} onValueChange={(v) => setFiltroPaquete(v as PaqueteId | 'todos')}>
+        <Select
+          value={filtroPaquete}
+          onValueChange={(v) => setFiltroPaquete(v as PaqueteClienteId | 'todos')}
+        >
           <SelectTrigger className="sm:w-56">
             <SelectValue placeholder="Filtrar por paquete" />
           </SelectTrigger>
@@ -79,6 +84,7 @@ export function ClientesListPage() {
                 {p.nombre}
               </SelectItem>
             ))}
+            <SelectItem value="personalizado">Personalizado</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -113,7 +119,11 @@ export function ClientesListPage() {
           </TableHeader>
           <TableBody>
             {clientesFiltrados.map((cliente) => {
-              const paquete = getPaquete(cliente.paqueteId);
+              const paquete = resolverPaquete(cliente);
+              const badgeVariant =
+                cliente.paqueteId === 'personalizado'
+                  ? 'outline'
+                  : BADGE_POR_NIVEL[getPaquete(cliente.paqueteId).nivel];
               return (
                 <TableRow key={cliente.id} className="cursor-pointer">
                   <TableCell>
@@ -122,10 +132,10 @@ export function ClientesListPage() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={BADGE_POR_NIVEL[paquete.nivel]}>{paquete.nombre}</Badge>
+                    <Badge variant={badgeVariant}>{paquete.nombre}</Badge>
                   </TableCell>
                   <TableCell>
-                    <PublicacionesRestantes clienteId={cliente.id} paqueteId={cliente.paqueteId} />
+                    <PublicacionesRestantes cliente={cliente} />
                   </TableCell>
                   <TableCell>Día {cliente.diaPago}</TableCell>
                   <TableCell>
