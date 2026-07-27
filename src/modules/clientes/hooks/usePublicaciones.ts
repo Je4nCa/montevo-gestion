@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { collection, addDoc, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { firestore } from '@/shared/lib/firebase';
 import { useAuthStore } from '@/modules/auth/store/useAuthStore';
-import type { Publicacion, PublicacionInput } from '@/shared/types/cliente';
+import type { Publicacion, PublicacionInput, TipoPublicacion } from '@/shared/types/cliente';
 
 interface UsePublicacionesResult {
   data: Publicacion[] | undefined;
   loading: boolean;
   error: Error | null;
   agregar: (input: PublicacionInput) => Promise<void>;
+  actualizar: (id: string, input: PublicacionInput) => Promise<void>;
+  eliminar: (id: string) => Promise<void>;
 }
 
 export function usePublicaciones(clienteId: string): UsePublicacionesResult {
@@ -48,19 +50,36 @@ export function usePublicaciones(clienteId: string): UsePublicacionesResult {
     });
   }
 
+  async function actualizar(id: string, input: PublicacionInput): Promise<void> {
+    if (!uid) throw new Error('No hay sesión activa');
+    await updateDoc(doc(firestore, 'negocio', uid, 'publicaciones', id), { ...input });
+  }
+
+  async function eliminar(id: string): Promise<void> {
+    if (!uid) throw new Error('No hay sesión activa');
+    await deleteDoc(doc(firestore, 'negocio', uid, 'publicaciones', id));
+  }
+
   return {
     data,
     loading: data === undefined,
     error,
     agregar,
+    actualizar,
+    eliminar,
   };
 }
 
-export function contarPublicacionesDelMes(publicaciones: Publicacion[] | undefined): number {
+function esDelMesActual(fechaIso: string): boolean {
+  const hoy = new Date();
+  const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
+  return fechaIso.slice(0, 7) === mesActual;
+}
+
+export function contarPublicacionesDelMes(
+  publicaciones: Publicacion[] | undefined,
+  tipo?: TipoPublicacion,
+): number {
   if (!publicaciones) return 0;
-  const ahora = new Date();
-  return publicaciones.filter((p) => {
-    const fecha = new Date(p.fecha);
-    return fecha.getFullYear() === ahora.getFullYear() && fecha.getMonth() === ahora.getMonth();
-  }).length;
+  return publicaciones.filter((p) => esDelMesActual(p.fecha) && (!tipo || p.tipo === tipo)).length;
 }

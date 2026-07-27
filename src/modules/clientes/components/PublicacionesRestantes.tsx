@@ -5,15 +5,28 @@ import type { Cliente } from '@/shared/types/cliente';
 export function PublicacionesRestantes({ cliente }: { cliente: Cliente }) {
   const { data: publicaciones, loading } = usePublicaciones(cliente.id);
   const paquete = resolverPaquete(cliente);
-  const usadas = contarPublicacionesDelMes(publicaciones);
-  const incluidas = paquete.publicacionesIncluidas;
-  const restantes = Math.max(incluidas - usadas, 0);
 
   if (loading) return <span className="text-muted-foreground">…</span>;
 
+  const usadasPub = contarPublicacionesDelMes(publicaciones, 'publicacion');
+  const usadasReels = contarPublicacionesDelMes(publicaciones, 'reel');
+  const restantesPub = Math.max(paquete.publicacionesIncluidas - usadasPub, 0);
+  const restantesReels = Math.max(paquete.reelsIncluidos - usadasReels, 0);
+
   return (
-    <span className={restantes === 0 ? 'font-semibold text-destructive' : ''}>
-      {incluidas >= 999 ? `${usadas} usadas (ilimitado)` : `${restantes} de ${incluidas}`}
+    <span className="flex flex-col text-sm leading-tight">
+      <span className={restantesPub === 0 ? 'font-semibold text-destructive' : ''}>
+        Pub:{' '}
+        {paquete.publicacionesIncluidas >= 999
+          ? `${usadasPub} (∞)`
+          : `${restantesPub}/${paquete.publicacionesIncluidas}`}
+      </span>
+      <span className={restantesReels === 0 ? 'font-semibold text-destructive' : ''}>
+        Reels:{' '}
+        {paquete.reelsIncluidos >= 999
+          ? `${usadasReels} (∞)`
+          : `${restantesReels}/${paquete.reelsIncluidos}`}
+      </span>
     </span>
   );
 }

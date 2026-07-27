@@ -211,14 +211,10 @@ export function ClienteDetailPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Publicaciones</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PublicacionesLog cliente={cliente} />
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <PublicacionesLog cliente={cliente} tipo="publicacion" />
+        <PublicacionesLog cliente={cliente} tipo="reel" />
+      </div>
 
       <Card>
         <CardHeader>
