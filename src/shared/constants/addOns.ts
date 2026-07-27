@@ -7,6 +7,7 @@ export const ADD_ONS: AddOn[] = [
   { id: 'pagina-web-adicional', nombre: 'Página web adicional' },
   { id: 'sistema-facturacion', nombre: 'Sistema de facturación' },
   { id: 'sistema-inventarios', nombre: 'Sistema de inventarios' },
+  { id: 'catalogo-productos-online', nombre: 'Catálogo de productos en línea' },
   { id: 'automatizaciones', nombre: 'Automatizaciones específicas' },
   { id: 'branding-avanzado', nombre: 'Branding avanzado' },
   { id: 'campanas-publicitarias', nombre: 'Campañas publicitarias' },
