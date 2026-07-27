@@ -73,5 +73,19 @@ export interface Publicacion {
   createdAt: string;
 }
 
+export interface CargoExtra {
+  id: string;
+  clienteId: string;
+  fecha: string;
+  itemId: string;
+  itemNombre: string;
+  cantidad: number;
+  precioUnitario: number;
+  total: number;
+  nota?: string;
+  createdAt: string;
+}
+
 export type ClienteInput = Omit<Cliente, 'id' | 'activo' | 'createdAt' | 'updatedAt'>;
 export type PublicacionInput = Omit<Publicacion, 'id' | 'createdAt'>;
+export type CargoExtraInput = Omit<CargoExtra, 'id' | 'createdAt'>;

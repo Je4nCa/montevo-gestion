@@ -5,6 +5,7 @@ import { useCliente } from '@/modules/clientes/hooks/useCliente';
 import { useClientes } from '@/modules/clientes/hooks/useClientes';
 import { ClienteForm } from '@/modules/clientes/components/ClienteForm';
 import { PublicacionesLog } from '@/modules/clientes/components/PublicacionesLog';
+import { CargosExtraLog } from '@/modules/clientes/components/CargosExtraLog';
 import { useAcuerdos } from '@/modules/clientes/acuerdos/hooks/useAcuerdos';
 import { descargarPdf, base64ToBlob } from '@/modules/clientes/acuerdos/lib/generarPdf';
 import { resolverPaquete } from '@/shared/lib/paqueteCliente';
@@ -216,6 +217,15 @@ export function ClienteDetailPage() {
         </CardHeader>
         <CardContent>
           <PublicacionesLog cliente={cliente} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Cobros extra</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CargosExtraLog clienteId={cliente.id} />
         </CardContent>
       </Card>
 
