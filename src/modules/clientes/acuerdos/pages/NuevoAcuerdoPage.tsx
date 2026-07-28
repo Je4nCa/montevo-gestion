@@ -91,6 +91,7 @@ export function NuevoAcuerdoPage() {
           ubicacion: cliente!.ubicacion,
           representanteNombre: cliente!.representante.nombre,
           representanteCedula: cliente!.representante.cedula,
+          diaPago: cliente!.diaPago,
         },
         firmaClienteDataUrl: dataUrlFirmaCliente,
         firmaMontevoDataUrl: firmaMontevoActual,

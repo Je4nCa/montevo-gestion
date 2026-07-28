@@ -171,8 +171,7 @@ export function AcuerdoDocument({ datos }: { datos: AcuerdoDocumentData }) {
           {`${formatMontoPdf(datos.precioMensual)} (${datos.precioEnPalabras}) mensuales, correspondiente a la totalidad del paquete de servicios descrito en la cláusula segunda.`}
         </Text>
         <Text style={styles.parrafo}>
-          El pago se realizará mensualmente, dentro de los primeros cinco (5) días naturales de
-          cada mes, mediante los siguientes medios, indicando el detalle "PagoMontevo":
+          {`El pago se realizará mensualmente, el día ${datos.clienteSnapshot.diaPago} de cada mes, mediante los siguientes medios, indicando el detalle "PagoMontevo":`}
         </Text>
         <Text style={styles.parrafo}>— SINPE Móvil: {MONTEVO_INFO.pagos.sinpe}</Text>
         <Text style={styles.parrafo}>— Cuenta BAC: {MONTEVO_INFO.pagos.cuentaBac}</Text>

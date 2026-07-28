@@ -5,6 +5,7 @@ export interface ClienteSnapshotAcuerdo {
   ubicacion: string;
   representanteNombre: string;
   representanteCedula: string;
+  diaPago: number;
 }
 
 export interface Acuerdo {
